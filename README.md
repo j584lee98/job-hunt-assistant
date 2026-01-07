@@ -1,22 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Job Hunt Assistant
+
+A Next.js application designed to assist with job hunting.
 
 ## Getting Started
 
-First, run the development server:
+1. **Install Dependencies**
+
+   ```bash
+   npm install
+   ```
+
+2. **Run Development Server**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+## Development Commands
+
+We have set up several scripts to ensure code quality:
+
+- **Format Code**: `npm run format` (uses Prettier)
+- **Lint Code**: `npm run lint` (uses ESLint)
+- **Type Check**: `npm run type-check` (uses TypeScript)
+- **Run Tests**: `npm test` (uses Jest)
+- **Watch Tests**: `npm run test:watch`
+
+### Check Everything
+
+To run all quality checks at once (Formatting, Linting, Type Checking, and Testing):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Make executable first: chmod +x verify.sh
+./verify.sh
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Docker Support
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+We provide full Docker support for containerized deployment.
+
+```bash
+# Build and run the container
+docker compose up --build
+```
+
+The application will be available at [http://localhost:3000](http://localhost:3000).
+
+## Continuous Integration & Ops
+
+- **GitHub Actions**: A CI pipeline is configured in `.github/workflows/ci.yml` that runs on every push and pull request to `main`. It confirms that the code builds, lints, and passes tests.
+- **Pre-commit Hooks**: Husky and lint-staged are configured to automatically format and lint staged files before committing, as well as run type checks.
+
+## Tech Stack
+
+- [Next.js](https://nextjs.org/)
+- [React](https://react.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Jest](https://jestjs.io/) & [React Testing Library](https://testing-library.com/)
+- [Prettier](https://prettier.io/) & [ESLint](https://eslint.org/)
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
