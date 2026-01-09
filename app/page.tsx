@@ -11,6 +11,7 @@ export default function Home() {
     message?: string
     filename?: string
     content?: string
+    summary?: string
     error?: string
   } | null>(null)
 
@@ -117,7 +118,7 @@ export default function Home() {
                       {uploadResponse.message} ({uploadResponse.filename})
                     </div>
                     <div className="bg-zinc-100 dark:bg-black p-3 rounded border dark:border-zinc-700 max-h-96 overflow-y-auto whitespace-pre-wrap text-sm font-mono">
-                      {uploadResponse.content}
+                      {uploadResponse.summary}
                     </div>
                   </div>
                 )}

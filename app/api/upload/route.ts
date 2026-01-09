@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { parseFileContent } from '@/lib/file-processing'
+import { resumeGraph } from '@/lib/resume-graph'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,11 +12,13 @@ export async function POST(request: NextRequest) {
     }
 
     const content = await parseFileContent(file)
+    const result = await resumeGraph.invoke({ content })
 
     return NextResponse.json({
-      message: 'File processed successfully',
+      message: 'File processed and summarized successfully',
       filename: file.name,
       content: content,
+      summary: result.summary,
     })
   } catch (error) {
     console.error('Upload error:', error)
