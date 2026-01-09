@@ -34,14 +34,19 @@ export default function Home() {
         body: formData,
       })
 
+      const text = await res.text()
       let data
+
       try {
-        data = await res.json()
+        data = JSON.parse(text)
       } catch (e) {
         console.error('Failed to parse response JSON', e)
-        const text = await res.text()
         console.error('Response text:', text)
         throw new Error('Server returned non-JSON response')
+      }
+
+      if (!res.ok) {
+        throw new Error(data.error || `Upload failed with status ${res.status}`)
       }
 
       setUploadResponse(data)

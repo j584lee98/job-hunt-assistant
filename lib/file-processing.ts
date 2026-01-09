@@ -1,6 +1,5 @@
 import mammoth from 'mammoth'
-
-import { PDFParse } from 'pdf-parse'
+import pdf from 'pdf-parse'
 
 export async function parseFileContent(file: File): Promise<string> {
   const buffer = Buffer.from(await file.arrayBuffer())
@@ -8,8 +7,7 @@ export async function parseFileContent(file: File): Promise<string> {
 
   try {
     if (fileType === 'application/pdf') {
-      const parser = new PDFParse({ data: buffer })
-      const data = await parser.getText()
+      const data = await pdf(buffer)
       return data.text
     } else if (
       fileType ===
