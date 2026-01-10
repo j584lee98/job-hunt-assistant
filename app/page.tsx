@@ -12,6 +12,7 @@ export default function Home() {
     filename?: string
     content?: string
     summary?: string
+    jobPostings?: string
     error?: string
   } | null>(null)
 
@@ -120,6 +121,85 @@ export default function Home() {
                     <div className="bg-zinc-100 dark:bg-black p-3 rounded border dark:border-zinc-700 max-h-96 overflow-y-auto whitespace-pre-wrap text-sm font-mono">
                       {uploadResponse.summary}
                     </div>
+
+                    {uploadResponse.jobPostings && (
+                      <div className="mt-6">
+                        <h3 className="font-semibold mb-3 text-lg">
+                          Recommended Job Postings:
+                        </h3>
+                        <div className="flex flex-col gap-4">
+                          {(() => {
+                            try {
+                              const postings = JSON.parse(
+                                uploadResponse.jobPostings
+                              )
+                              if (Array.isArray(postings)) {
+                                return postings.map(
+                                  (
+                                    job: {
+                                      title?: string
+                                      url?: string
+                                      content?: string
+                                    },
+                                    i: number
+                                  ) => (
+                                    <div
+                                      key={i}
+                                      className="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all hover:shadow-md"
+                                    >
+                                      <h4 className="font-bold text-blue-600 dark:text-blue-400 mb-2">
+                                        <a
+                                          href={job.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="hover:underline"
+                                        >
+                                          {job.title || 'View Job Posting'}
+                                        </a>
+                                      </h4>
+                                      <p className="text-zinc-600 dark:text-zinc-300 text-sm mb-2 line-clamp-3">
+                                        {job.content}
+                                      </p>
+                                      {job.url && (
+                                        <a
+                                          href={job.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 underline"
+                                        >
+                                          Read full description
+                                        </a>
+                                      )}
+                                    </div>
+                                  )
+                                )
+                              } else if (
+                                typeof postings === 'string' &&
+                                postings.startsWith('No job')
+                              ) {
+                                return (
+                                  <div className="text-zinc-500">
+                                    {postings}
+                                  </div>
+                                )
+                              } else {
+                                return (
+                                  <pre className="text-xs overflow-auto p-2 bg-zinc-100 dark:bg-black rounded">
+                                    {JSON.stringify(postings, null, 2)}
+                                  </pre>
+                                )
+                              }
+                            } catch (_) {
+                              return (
+                                <div className="text-zinc-500">
+                                  {uploadResponse.jobPostings}
+                                </div>
+                              )
+                            }
+                          })()}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

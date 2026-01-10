@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
       filename: file.name,
       content: content,
       summary: result.summary,
+      jobPostings: result.jobPostings,
     })
   } catch (error) {
     console.error('Upload error:', error)
