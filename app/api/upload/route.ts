@@ -6,17 +6,30 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File | null
+    const text = formData.get('text') as string | null
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
+    if (!file && !text) {
+      return NextResponse.json(
+        { error: 'No file or text provided' },
+        { status: 400 }
+      )
     }
 
-    const content = await parseFileContent(file)
+    let content = ''
+    let filename = 'text-input'
+
+    if (file) {
+      content = await parseFileContent(file)
+      filename = file.name
+    } else if (text) {
+      content = text
+    }
+
     const result = await resumeGraph.invoke({ content })
 
     return NextResponse.json({
-      message: 'File processed and summarized successfully',
-      filename: file.name,
+      message: 'Processing successful',
+      filename: filename,
       content: content,
       summary: result.summary,
       jobPostings: result.jobPostings,

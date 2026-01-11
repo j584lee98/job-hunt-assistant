@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 
 export default function Home() {
   // Upload state
+  const [inputType, setInputType] = useState<'file' | 'text'>('file')
   const [file, setFile] = useState<File | null>(null)
+  const [textInput, setTextInput] = useState('')
   const [uploading, setUploading] = useState(false)
   const [uploadResponse, setUploadResponse] = useState<{
     message?: string
@@ -25,11 +26,17 @@ export default function Home() {
   }
 
   const handleUpload = async () => {
-    if (!file) return
+    if (inputType === 'file' && !file) return
+    if (inputType === 'text' && !textInput.trim()) return
 
     setUploading(true)
     const formData = new FormData()
-    formData.append('file', file)
+
+    if (inputType === 'file' && file) {
+      formData.append('file', file)
+    } else if (inputType === 'text') {
+      formData.append('text', textInput)
+    }
 
     try {
       const res = await fetch('/api/upload', {
@@ -63,50 +70,100 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center py-20 px-8 bg-white dark:bg-black sm:items-start">
+        <div className="flex flex-col items-center gap-4 text-center sm:items-start sm:text-left mb-12 w-full">
+          <h1 className="text-4xl font-bold tracking-tight text-black dark:text-zinc-50">
             Job Hunt Assistant
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Upload your resume or job description to extract its text.
+          <p className="text-lg leading-7 text-zinc-600 dark:text-zinc-400 max-w-xl">
+            Streamline your job search process. Upload your resume or paste job
+            descriptions to get AI-powered insights, validation, and matching
+            scores to improve your applications.
           </p>
         </div>
 
-        <div className="flex flex-col gap-8 w-full mt-8">
-          {/* Upload API Section */}
-          <div className="flex flex-col gap-4 p-6 border rounded-xl dark:border-zinc-800">
-            <h2 className="text-xl font-semibold">Document Upload</h2>
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="file-upload"
-                className="block text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100"
+        <div className="flex flex-col gap-8 w-full">
+          {/* Input Section */}
+          <div className="flex flex-col gap-6 p-8 border rounded-xl dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm">
+            {/* Toggle Tabs */}
+            <div className="flex gap-4 border-b border-zinc-200 dark:border-zinc-700 pb-4">
+              <button
+                onClick={() => setInputType('file')}
+                className={`pb-1 px-1 text-sm font-medium transition-colors relative ${
+                  inputType === 'file'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                }`}
               >
-                Select a document (.pdf, .docx, .txt)
-              </label>
-              <input
-                id="file-upload"
-                type="file"
-                accept=".pdf,.docx,.txt"
-                onChange={handleFileChange}
-                className="block w-full text-sm text-zinc-900 border border-zinc-300 rounded-lg cursor-pointer bg-zinc-50 dark:text-zinc-400 focus:outline-none dark:bg-zinc-700 dark:border-zinc-600 dark:placeholder-zinc-400"
-              />
+                File Upload
+                {inputType === 'file' && (
+                  <span className="absolute bottom-[-17px] left-0 w-full h-0.5 bg-blue-600 dark:bg-blue-400" />
+                )}
+              </button>
+              <button
+                onClick={() => setInputType('text')}
+                className={`pb-1 px-1 text-sm font-medium transition-colors relative ${
+                  inputType === 'text'
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                }`}
+              >
+                Paste Text
+                {inputType === 'text' && (
+                  <span className="absolute bottom-[-17px] left-0 w-full h-0.5 bg-blue-600 dark:bg-blue-400" />
+                )}
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {inputType === 'file' ? (
+                <>
+                  <label
+                    htmlFor="file-upload"
+                    className="block text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100"
+                  >
+                    Select a document (.pdf, .docx, .txt)
+                  </label>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept=".pdf,.docx,.txt"
+                    onChange={handleFileChange}
+                    className="block w-full text-sm text-zinc-900 border border-zinc-300 rounded-lg cursor-pointer bg-zinc-50 dark:text-zinc-400 focus:outline-none dark:bg-zinc-700 dark:border-zinc-600 dark:placeholder-zinc-400"
+                  />
+                </>
+              ) : (
+                <>
+                  <label
+                    htmlFor="text-input"
+                    className="block text-sm font-medium leading-6 text-zinc-900 dark:text-zinc-100"
+                  >
+                    Paste resume text or job description
+                  </label>
+                  <textarea
+                    id="text-input"
+                    rows={10}
+                    value={textInput}
+                    onChange={(e) => setTextInput(e.target.value)}
+                    placeholder="Paste your content here..."
+                    className="block w-full rounded-md border-0 py-2.5 text-zinc-900 shadow-sm ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 dark:bg-zinc-800 dark:text-white dark:ring-zinc-700 sm:text-sm sm:leading-6"
+                  />
+                </>
+              )}
             </div>
 
             <button
               onClick={handleUpload}
-              disabled={uploading || !file}
+              disabled={
+                uploading || (inputType === 'file' ? !file : !textInput.trim())
+              }
               className="flex h-10 items-center justify-center gap-2 rounded-full bg-blue-600 px-5 text-white transition-colors hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed w-full md:w-auto"
             >
-              {uploading ? 'Processing...' : 'Upload & Extract Text'}
+              {uploading
+                ? 'Processing...'
+                : inputType === 'file'
+                  ? 'Upload & Analyze'
+                  : 'Analyze Text'}
             </button>
 
             {uploadResponse && (
