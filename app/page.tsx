@@ -13,6 +13,7 @@ export default function Home() {
     content?: string
     summary?: string
     jobPostings?: string
+    topMatches?: string
     error?: string
   } | null>(null)
 
@@ -122,16 +123,135 @@ export default function Home() {
                       {uploadResponse.summary}
                     </div>
 
-                    {uploadResponse.jobPostings && (
+                    {(uploadResponse.topMatches ||
+                      uploadResponse.jobPostings) && (
                       <div className="mt-6">
                         <h3 className="font-semibold mb-3 text-lg">
-                          Recommended Job Postings:
+                          {uploadResponse.topMatches
+                            ? 'Top Matches'
+                            : 'Recommended Job Postings'}
                         </h3>
                         <div className="flex flex-col gap-4">
                           {(() => {
+                            // Helper for stars
+                            const renderStars = (score: number) => (
+                              <div
+                                className="flex gap-1"
+                                title={`Score: ${score}/5`}
+                              >
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <span
+                                    key={star}
+                                    className={`text-lg leading-none ${
+                                      star <= Math.round(score)
+                                        ? 'text-yellow-400'
+                                        : 'text-zinc-300 dark:text-zinc-600'
+                                    }`}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                            )
+
                             try {
+                              if (uploadResponse.topMatches) {
+                                const jobs = JSON.parse(
+                                  uploadResponse.topMatches
+                                )
+                                if (Array.isArray(jobs) && jobs.length > 0) {
+                                  return jobs.map(
+                                    (
+                                      job: {
+                                        title?: string
+                                        url?: string
+                                        content?: string
+                                        finalScore?: number
+                                        reasoning?: string
+                                        scores?: {
+                                          skillsFit?: number
+                                          seniorityFit?: number
+                                          industryFit?: number
+                                        }
+                                      },
+                                      i: number
+                                    ) => (
+                                      <div
+                                        key={i}
+                                        className="bg-white dark:bg-zinc-900 p-6 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all hover:shadow-md"
+                                      >
+                                        <div className="flex justify-between items-start mb-4 gap-4">
+                                          <h4 className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                            <a
+                                              href={job.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="hover:underline"
+                                            >
+                                              {job.title || 'View Job Posting'}
+                                            </a>
+                                          </h4>
+                                          <div className="flex flex-col items-end shrink-0">
+                                            <span className="text-3xl font-bold text-zinc-900 dark:text-white">
+                                              {job.finalScore?.toFixed(1) ||
+                                                'N/A'}
+                                            </span>
+                                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                                              Match
+                                            </span>
+                                          </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4 bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-md border border-zinc-100 dark:border-zinc-800">
+                                          <div>
+                                            <div className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">
+                                              Role & Skills
+                                            </div>
+                                            {renderStars(
+                                              job.scores?.skillsFit || 0
+                                            )}
+                                          </div>
+                                          <div>
+                                            <div className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">
+                                              Experience
+                                            </div>
+                                            {renderStars(
+                                              job.scores?.seniorityFit || 0
+                                            )}
+                                          </div>
+                                          <div>
+                                            <div className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500 mb-1">
+                                              Industry
+                                            </div>
+                                            {renderStars(
+                                              job.scores?.industryFit || 0
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        <p className="text-zinc-600 dark:text-zinc-300 text-sm mb-4 leading-relaxed">
+                                          {job.reasoning || job.content}
+                                        </p>
+
+                                        {job.url && (
+                                          <a
+                                            href={job.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                                          >
+                                            View Application &rarr;
+                                          </a>
+                                        )}
+                                      </div>
+                                    )
+                                  )
+                                }
+                              }
+
+                              // Fallback to standard list if no top 3 or parsing failed (but jobPostings exists)
                               const postings = JSON.parse(
-                                uploadResponse.jobPostings
+                                uploadResponse.jobPostings || '[]'
                               )
                               if (Array.isArray(postings)) {
                                 return postings.map(
@@ -174,25 +294,21 @@ export default function Home() {
                                   )
                                 )
                               } else if (
-                                typeof postings === 'string' &&
-                                postings.startsWith('No job')
+                                typeof uploadResponse.jobPostings ===
+                                  'string' &&
+                                uploadResponse.jobPostings.startsWith('No job')
                               ) {
                                 return (
                                   <div className="text-zinc-500">
-                                    {postings}
+                                    {uploadResponse.jobPostings}
                                   </div>
                                 )
-                              } else {
-                                return (
-                                  <pre className="text-xs overflow-auto p-2 bg-zinc-100 dark:bg-black rounded">
-                                    {JSON.stringify(postings, null, 2)}
-                                  </pre>
-                                )
                               }
-                            } catch (_) {
+                            } catch {
                               return (
                                 <div className="text-zinc-500">
-                                  {uploadResponse.jobPostings}
+                                  {uploadResponse.topMatches ||
+                                    uploadResponse.jobPostings}
                                 </div>
                               )
                             }
