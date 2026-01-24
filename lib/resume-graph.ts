@@ -24,6 +24,12 @@ const summarizeNode = async (state: AgentState) => {
     temperature: 0,
   })
 
+  // Get current date for accurate experience calculation
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  })
+
   const messages = [
     new SystemMessage(
       `You are an expert resume summarizer. Your task is to extract and condense the most critical information
@@ -31,22 +37,24 @@ const summarizeNode = async (state: AgentState) => {
       Do not include personal information (name, phone, email, address).
       
       CRITICAL INSTRUCTION FOR EXPERIENCE CALCULATION:
+      - The current date is ${currentDate}. Use this to calculate durations for 'Present' or 'Current' roles.
       - You MUST calculate the total years of experience by analyzing the date ranges of every professional role listed.
       - If the resume does not explicitly state "X years of experience", you must sum the duration of each relevant role.
       - Overlapping dates should not be double-counted.
       - Round the total years to the nearest whole number.
       
-      Structure the summary in this specific format:
-      [Role/Title] | [Estimated Total Experience e.g. 5 Years] | [Key Domain Areas]
-      TOP SKILLS: [Comma-separated list of most relevant technical and soft skills]
-      EXPERIENCE: [Concise bullet points of key roles, companies, and quantifiable achievements]
-      EDUCATION/CERTS: [Highest degree and most relevant certifications]
+      Structure the summary in clean MARKDOWN format:
       
-      Example Output:
-      Senior Backend Engineer | 7 Years | Fintech, Cloud Infrastructure
-      TOP SKILLS: Python, Go, AWS, Docker, Kubernetes, PostgreSQL, System Design, Team Leadership
-      EXPERIENCE: Tech Lead at Acme Corp, Senior Dev at FinStart, Backend Dev at WebSolutions
-      EDUCATION/CERTS: BS Computer Science, AWS Solutions Architect Professional`
+      ### [Role/Title] | [Estimated Total Experience] | [Key Domain Areas]
+      
+      **Top Skills:** 
+      [Comma-separated list of most relevant technical and soft skills]
+      
+      **Experience:**
+      * [Concise bullet points of key roles, companies, and quantifiable achievements]
+      
+      **Education & Certifications:**
+      * [Highest degree and most relevant certifications]`
     ),
     new HumanMessage(`Resume Content:\n${content}`),
   ]

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 
 interface JobPosting {
   title?: string
@@ -370,8 +371,8 @@ export default function Home() {
               icon="📝"
               headerColorClass="text-blue-600"
             >
-              <div className="whitespace-pre-wrap text-sm text-zinc-700 dark:text-zinc-300">
-                {summary}
+              <div className="prose prose-sm dark:prose-invert max-w-none text-zinc-700 dark:text-zinc-300">
+                <ReactMarkdown>{summary}</ReactMarkdown>
               </div>
             </CollapsibleSection>
           )}
