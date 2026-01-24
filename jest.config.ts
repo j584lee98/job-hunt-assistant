@@ -12,6 +12,11 @@ const config: Config = {
   testEnvironment: 'jsdom',
   // Add more setup options before each test is run
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  moduleNameMapper: {
+    // Force the use of the CommonJS entry point for react-markdown if available, or mock it dynamically if needed
+    // However, react-markdown 9+ is ESM only.
+    // We will mock this in jest.setup.ts instead of mapping to a file.
+  },
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
