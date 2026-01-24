@@ -25,15 +25,54 @@ export async function POST(request: NextRequest) {
       content = text
     }
 
-    const result = await resumeGraph.invoke({ content })
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Send initial metadata
+          controller.enqueue(
+            new TextEncoder().encode(
+              JSON.stringify({
+                type: 'metadata',
+                filename,
+                content,
+              }) + '\n'
+            )
+          )
 
-    return NextResponse.json({
-      message: 'Processing successful',
-      filename: filename,
-      content: content,
-      summary: result.summary,
-      jobPostings: result.jobPostings,
-      topMatches: result.topMatches,
+          // Stream graph updates
+          for await (const chunk of await resumeGraph.stream({ content })) {
+            for (const [nodeName, updates] of Object.entries(chunk)) {
+              controller.enqueue(
+                new TextEncoder().encode(
+                  JSON.stringify({
+                    type: 'update',
+                    node: nodeName,
+                    data: updates,
+                  }) + '\n'
+                )
+              )
+            }
+          }
+          controller.close()
+        } catch (e) {
+          controller.enqueue(
+            new TextEncoder().encode(
+              JSON.stringify({
+                type: 'error',
+                error: (e as Error).message,
+              }) + '\n'
+            )
+          )
+          controller.close()
+        }
+      },
+    })
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'application/x-ndjson', // Newline delimited JSON
+        'Transfer-Encoding': 'chunked',
+      },
     })
   } catch (error) {
     console.error('Upload error:', error)
