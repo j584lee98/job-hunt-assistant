@@ -74,15 +74,17 @@ const retrieverNode = async (state: AgentState) => {
   const messages = [
     new SystemMessage(
       `You are a specialized job search agent. Your goal is to find the most relevant and currently active
-      job postings based on the resume summary. Generate specific search queries to find listings that
+      LinkedIn job postings based on the resume summary. Generate specific search queries to find listings that
       match the candidate skills and experience level. You must retrieve ${MAX_SEARCH_RESULTS} postings.
 
       CRITICAL INSTRUCTIONS:
-      - Construct queries to find SPECIFIC job pages, not general search results.
+      - You must ONLY search for jobs on LinkedIn (site:linkedin.com/jobs/view).
+      - Construct queries to find SPECIFIC LinkedIn job pages.
       - Avoid generic queries like "jobs for java developer" which often return pages showing multiple
         job listings instead of specific postings.
-      - Each result MUST be a direct link to a single job posting page.
+      - Each result MUST be a direct link to a single LinkedIn job posting page.
       - Each posting MUST clearly indicate the job title and description, company name, and location.
+      - VERIFY that the job is currently ACTIVE. Exclude postings that state "no longer accepting applications", "closed", or "expired".
       - Do NOT return blog posts, articles, "top 10" lists, or general career advice pages.
       - Do NOT return pages that list multiple jobs.
       - Focus on finding links to direct applications or specific job descriptions.`
@@ -217,6 +219,10 @@ const evaluatorNode = async (state: AgentState) => {
       Return the evaluation for every job.
       
       IMPORTANT SCORING INSTRUCTION:
+      - Be CRITICAL and SKEPTICAL. Do not be overly generous.
+      - Use the FULL range of scores (1-5). If a job is only a partial match, give it a 2 or 3.
+      - If the provided content snippet is too short to determine a specific fit, penalize the score slightly rather than assuming a perfect match.
+      - DIVERSIFY your scores. It is highly unlikely that a job is a 4/5 across all three categories. Realistically, a job might be a 5 for skills but a 3 for seniority. SCORE EACH AXIS INDEPENDENTLY.
       - Provide a SEPARATE and ACCURATE score for EACH of the 3 categories based on the scoring guides alone.
       - Do NOT simply assign the same score to all categories unless they truly warrant identical scores.
       - Calculate the final score as the mathematical average of these 3 distinct scores.

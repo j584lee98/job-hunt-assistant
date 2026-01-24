@@ -2,8 +2,6 @@
 
 import { useState } from 'react'
 
-type NodeStatus = 'idling' | 'working' | 'done'
-
 interface JobPosting {
   title?: string
   url?: string
@@ -37,7 +35,7 @@ const CollapsibleSection = ({
     <div className="flex flex-col border rounded-xl dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm animate-in fade-in slide-in-from-bottom-4 duration-500 overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between p-6 w-full text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors z-10 relative bg-white dark:bg-zinc-900"
+        className="flex items-center justify-between p-6 w-full text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors z-10 relative bg-white dark:bg-zinc-900 cursor-pointer"
       >
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <span className={headerColorClass}>{icon}</span>
@@ -246,16 +244,16 @@ export default function Home() {
   )
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-100 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center py-20 px-8 bg-white dark:bg-black sm:items-start">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 font-sans dark:bg-slate-950">
+      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center py-20 px-8 bg-white dark:bg-slate-950 sm:items-start">
         <div className="flex flex-col items-center gap-4 text-center sm:items-start sm:text-left mb-12 w-full">
           <h1 className="text-4xl font-bold tracking-tight text-black dark:text-zinc-50">
             Job Hunt Assistant
           </h1>
           <p className="text-lg leading-7 text-zinc-600 dark:text-zinc-400 w-full">
-            Streamline your job search process. Upload your resume or paste job
-            descriptions to get AI-powered insights, validation, and matching
-            scores.
+            Streamline your job search process. Upload your resume to find
+            active LinkedIn job postings, get AI-powered insights, and see your
+            match scores.
           </p>
         </div>
 
