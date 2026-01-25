@@ -1,78 +1,121 @@
 # Job Hunt Assistant
 
-A Next.js application designed to assist with job hunting.
+An intelligent, AI-powered agentic workflow designed to streamline your job search process. This application allows you to upload a resume (PDF, DOCX, TXT) or paste text, and then orchestrates a team of AI agents to analyze your profile, find relevant jobs on LinkedIn, and score them against your specific qualifications.
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![LangGraph](https://img.shields.io/badge/LangGraph-Agentic_Workflow-blue)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-green)
 
-1. **Install Dependencies**
+## 🤖 Agentic Workflow
 
-   ```bash
-   npm install
-   ```
+The application uses **LangGraph** to coordinate a stateful workflow of specialized AI agents:
 
-2. **Run Development Server**
-   ```bash
-   npm run dev
-   ```
-   Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1.  **Validator Agent**:
+    - **Role**: Quality Control.
+    - **Task**: Analyzes the input file to ensure it is a valid resume containing a name, contact info, and professional history.
+    - **Action**: Rejects invalid files (recipes, code snippets, etc.) immediately to save processing costs.
 
-## Development Commands
+2.  **Summarizer Agent**:
+    - **Role**: Data Extractor.
+    - **Task**: Condenses your resume into a high-signal Markdown summary.
+    - **Features**: intelligently handles employment gaps and calculates total years of experience by summing role durations (instead of relying on self-reported numbers).
 
-We have set up several scripts to ensure code quality:
+3.  **Retriever Agent**:
+    - **Role**: Headhunter.
+    - **Task**: Uses **Tavily Search API** to find _active_ LinkedIn job postings (site:linkedin.com/jobs/view) that match your summarized profile.
 
-- **Format Code**: `npm run format` (uses Prettier)
-- **Lint Code**: `npm run lint` (uses ESLint)
-- **Type Check**: `npm run type-check` (uses TypeScript)
-- **Run Tests**: `npm test` (uses Jest)
-- **Watch Tests**: `npm run test:watch`
+4.  **Evaluator Agent**:
+    - **Role**: Recruiter / Hiring Manager.
+    - **Task**: Scores each found job (1-5 stars) on three axes:
+      - **Skills Fit**: Do you have the tech stack?
+      - **Seniority Fit**: Is the experience level appropriate?
+      - **Industry Fit**: Is the domain relevant?
+    - **Filter**: Discards generic career pages or search results, keeping only specific single-job postings.
 
-### Check Everything
+## 🚀 Getting Started
 
-To run all quality checks at once (Formatting, Linting, Type Checking, and Testing):
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- **OpenAI API Key**: For the LLM agents.
+- **Tavily API Key**: For the search / retrieval agent.
+
+### 1. Environment Setup
+
+Create a `.env` file in the root directory (use `.env.example` as a template):
 
 ```bash
-# Make executable first: chmod +x verify.sh
+cp .env.example .env.local
+```
+
+Fill in your keys:
+
+```ini
+NEXT_PUBLIC_OPENAI_MODEL=gpt-5
+OPENAI_API_KEY=sk-proj-...
+TAVILY_API_KEY=tvly-...
+```
+
+### 2. Installation
+
+```bash
+npm install
+```
+
+### 3. Running Locally
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to use the assistant.
+
+## 🐳 Docker Deployment
+
+The project is configured for a production-ready Docker deployment using Next.js standalone output.
+
+1.  **Build and Run**:
+    ```bash
+    docker compose up --build
+    ```
+2.  **Access**:
+    The app will be available at `http://localhost:3000`.
+
+_Note: Ensure your `.env` file is present, as Docker Compose will read it._
+
+## 🛠️ Development & Validation
+
+We enforce code quality via **Husky** pre-commit hooks and a verification script.
+
+- **Format**: `npm run format` (Prettier)
+- **Lint**: `npm run lint` (ESLint)
+- **Test**: `npm test` (Jest)
+- **Type Check**: `npm run type-check`
+
+**Run all checks at once:**
+
+```bash
 ./verify.sh
 ```
 
-## Docker Support
+## 📂 Project Structure
 
-We provide full Docker support for containerized deployment.
+- **`app/`**: Next.js App Router pages and API routes.
+  - `api/upload/route.ts`: Streaming endpoint that runs the LangGraph workflow.
+  - `page.tsx`: Main client-side UI with real-time status updates.
+- **`lib/`**: Core logic.
+  - `resume-graph.ts`: **The Brain.** Defines the LangGraph nodes (Validator, Summarizer, Retriever, Evaluator) and edges.
+  - `file-processing.ts`: Utilities for parsing PDF/DOCX files.
+- **`tests/`**: Jest unit tests and mocks.
 
-```bash
-# Build and run the container
-docker compose up --build
-```
+## ☁️ Deployment (Vercel)
 
-The application will be available at [http://localhost:3000](http://localhost:3000).
+1.  Push your code to GitHub.
+2.  Import the project into Vercel.
+3.  Add your Environment Variables in the Vercel Dashboard (Settings > Environment Variables).
+4.  Deploy!
 
-## Continuous Integration & Ops
+---
 
-- **GitHub Actions**: A CI pipeline is configured in `.github/workflows/ci.yml` that runs on every push and pull request to `main`. It confirms that the code builds, lints, and passes tests.
-- **Pre-commit Hooks**: Husky and lint-staged are configured to automatically format and lint staged files before committing, as well as run type checks.
-
-## Tech Stack
-
-- [Next.js](https://nextjs.org/)
-- [React](https://react.dev/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Jest](https://jestjs.io/) & [React Testing Library](https://testing-library.com/)
-- [Prettier](https://prettier.io/) & [ESLint](https://eslint.org/)
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+_Built with Next.js 15, React 19, and LangGraph._
