@@ -22,7 +22,7 @@ interface AgentState {
 const validatorNode = async (state: AgentState) => {
   const { content } = state
   const model = new ChatOpenAI({
-    modelName: process.env.OPENAI_MODEL || 'gpt-5',
+    modelName: process.env.NEXT_PUBLIC_OPENAI_MODEL || 'gpt-5',
     temperature: 0,
   })
 
@@ -68,7 +68,7 @@ const validatorNode = async (state: AgentState) => {
 const summarizeNode = async (state: AgentState) => {
   const { content } = state
   const model = new ChatOpenAI({
-    modelName: process.env.OPENAI_MODEL || 'gpt-5',
+    modelName: process.env.NEXT_PUBLIC_OPENAI_MODEL || 'gpt-5',
     temperature: 0,
   })
 
@@ -87,7 +87,9 @@ const summarizeNode = async (state: AgentState) => {
       CRITICAL INSTRUCTION FOR EXPERIENCE CALCULATION:
       - The current date is ${currentDate}. Use this to calculate durations for 'Present' or 'Current' roles.
       - You MUST calculate the total years of experience by analyzing the date ranges of every professional role listed.
-      - If the resume does not explicitly state "X years of experience", you must sum the duration of each relevant role.
+      - If the resume specifies "X years of experience" directly, use that.
+      - OTHERWISE, you must sum the duration of each relevant role.
+      - Be mindful of employment gaps. Do NOT assume employment during gaps. Only count time explicitly covered by a role.
       - Overlapping dates should not be double-counted.
       - Round the total years to the nearest whole number.
       
@@ -123,7 +125,7 @@ const retrieverNode = async (state: AgentState) => {
   })
 
   const model = new ChatOpenAI({
-    modelName: process.env.OPENAI_MODEL || 'gpt-5',
+    modelName: process.env.NEXT_PUBLIC_OPENAI_MODEL || 'gpt-5',
     temperature: 0,
   }).bindTools([tool])
 
@@ -197,7 +199,7 @@ const evaluatorNode = async (state: AgentState) => {
   }
 
   const model = new ChatOpenAI({
-    modelName: process.env.OPENAI_MODEL || 'gpt-5',
+    modelName: process.env.NEXT_PUBLIC_OPENAI_MODEL || 'gpt-5',
     temperature: 0,
   })
 

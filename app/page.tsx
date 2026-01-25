@@ -53,7 +53,9 @@ const CollapsibleSection = ({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="px-6 pb-6 pt-0">{children}</div>
+          <div className="px-6 pb-6 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+            {children}
+          </div>
         </div>
       </div>
     </div>
@@ -260,6 +262,9 @@ export default function Home() {
           <h1 className="text-4xl font-bold tracking-tight text-black dark:text-zinc-50">
             Job Hunt Assistant
           </h1>
+          <p className="text-sm font-mono text-zinc-500 dark:text-zinc-500">
+            model: {process.env.NEXT_PUBLIC_OPENAI_MODEL || 'gpt-5'}
+          </p>
           <p className="text-lg leading-7 text-zinc-600 dark:text-zinc-400 w-full">
             Streamline your job search process. Upload your resume to find
             active LinkedIn job postings, get AI-powered insights, and see your
