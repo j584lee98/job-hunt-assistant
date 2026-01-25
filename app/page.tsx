@@ -136,12 +136,21 @@ export default function Home() {
             if (data.type === 'metadata') {
               // Initial metadata received
               // console.log('Metadata:', data)
-              setCurrentNode('summarize') // graph starts immediately
+              setCurrentNode('validator') // graph starts immediately
             } else if (data.type === 'update') {
               const { node, data: nodeData } = data
               setCurrentNode(node)
 
-              if (node === 'summarize' && nodeData.summary) {
+              if (node === 'validator') {
+                if (nodeData.isValid === false) {
+                  setError(nodeData.validationError || 'Invalid resume format')
+                  setCurrentNode(null)
+                  // The stream might continue closing, but we are done.
+                } else {
+                  // If valid, we expect next transition to summarize, but let's update UI text
+                  setCurrentNode('summarize')
+                }
+              } else if (node === 'summarize' && nodeData.summary) {
                 setSummary(nodeData.summary)
                 setCurrentNode('retriever') // Next logical step
               } else if (node === 'retriever' && nodeData.jobPostings) {
@@ -346,6 +355,16 @@ export default function Home() {
           {/* Workflow Status */}
           {(uploading || summary) && (
             <div className="flex flex-col gap-3">
+              <StatusIndicator
+                active={currentNode === 'validator'}
+                completed={
+                  !!summary ||
+                  currentNode === 'summarize' ||
+                  currentNode === 'retriever' ||
+                  currentNode === 'evaluator'
+                }
+                label="Validator Agent: Verifying resume format..."
+              />
               <StatusIndicator
                 active={currentNode === 'summarize'}
                 completed={!!summary}

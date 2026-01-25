@@ -14,6 +14,54 @@ interface AgentState {
   summary: string
   jobPostings: string
   topMatches: string
+  isValid?: boolean
+  validationError?: string
+}
+
+// Define the validator node
+const validatorNode = async (state: AgentState) => {
+  const { content } = state
+  const model = new ChatOpenAI({
+    modelName: process.env.OPENAI_MODEL || 'gpt-5',
+    temperature: 0,
+  })
+
+  const ValidatorSchema = z.object({
+    isValid: z
+      .boolean()
+      .describe('True if the content is a valid resume, false otherwise.'),
+    validationError: z
+      .string()
+      .describe(
+        'Explanation of why the content is not a valid resume, or empty string if valid.'
+      ),
+  })
+
+  const structuredModel = model.withStructuredOutput(ValidatorSchema)
+
+  const messages = [
+    new SystemMessage(
+      `You are an expert file validator. Your task is to determine if the provided text content is a valid resume or CV.
+      
+      A valid resume MUST contain:
+      1. Candidate's Name (or plausible placeholder)
+      2. Contact Information (email, phone, or address)
+      3. At least one section regarding Experience, Skills, or Education.
+      
+      If the text appears to be some other document (like a recipe, a blog post, code snippet, or gibberish), mark it as invalid.
+      If the text is too short or lacks sufficient information to be a resume, mark it as invalid.
+      
+      Return a structured output with 'isValid' boolean and a 'validationError' message if invalid.`
+    ),
+    new HumanMessage(`Content to validate:\n${content}`),
+  ]
+
+  const response = await structuredModel.invoke(messages)
+
+  return {
+    isValid: response.isValid,
+    validationError: response.validationError,
+  }
 }
 
 // Define the summarization node
@@ -273,12 +321,29 @@ const workflow = new StateGraph<AgentState>({
       reducer: (x: string, y: string) => y ?? x,
       default: () => '',
     },
+    isValid: {
+      reducer: (x: boolean | undefined, y: boolean | undefined) => y ?? x,
+      default: () => undefined,
+    },
+    validationError: {
+      reducer: (x: string | undefined, y: string | undefined) => y ?? x,
+      default: () => undefined,
+    },
   },
 })
+  .addNode('validator', validatorNode)
   .addNode('summarize', summarizeNode)
   .addNode('retriever', retrieverNode)
   .addNode('evaluator', evaluatorNode)
-  .addEdge('__start__', 'summarize')
+  .addEdge('__start__', 'validator')
+  .addConditionalEdges(
+    'validator',
+    (state) => (state.isValid ? 'summarize' : '__end__'),
+    {
+      summarize: 'summarize',
+      __end__: '__end__',
+    }
+  )
   .addEdge('summarize', 'retriever')
   .addEdge('retriever', 'evaluator')
   .addEdge('evaluator', '__end__')
